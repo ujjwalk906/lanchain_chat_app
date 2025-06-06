@@ -1,7 +1,7 @@
 # cli.py
 import uuid
 from db import get_engine, get_session, initialize_database, Conversation
-from history import get_messages, add_user_message, add_ai_message
+from conversation_ops import get_messages, add_user_message, add_ai_message
 from chat_engine import get_llm, get_ai_response
 
 def create_conversation(db_session, name):
@@ -16,8 +16,8 @@ def cli_chat():
     engine = get_engine()
     initialize_database(engine)
     db_session = get_session(engine)
-    api_key = input("Enter your OpenAI API key: ").strip()
-    llm = get_llm()
+    # api_key = input("Enter your OpenAI API key: ").strip()
+    llm = get_llm("llama3.2:1b-instruct-q8_0")
 
     # --- New conversation ---
     conversation_name = input("Enter a name for your conversation: ")
@@ -32,8 +32,12 @@ def cli_chat():
         add_user_message(thread_id, user_input, db_session)
         messages = get_messages(thread_id, db_session)
         response = get_ai_response(messages, llm)
-        add_ai_message(thread_id, response.content, db_session)
-        print(f"AI: {response.content}")
+        add_ai_message(thread_id, response, db_session)
+        print(f"AI: {response}")
+
+        # for openai models use this
+        # add_ai_message(thread_id, response.content, db_session)
+        # print(f"AI: {response.content}")
 
 if __name__ == "__main__":
     cli_chat()

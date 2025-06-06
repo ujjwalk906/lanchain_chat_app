@@ -1,5 +1,6 @@
 # db.py
 from sqlalchemy import create_engine, Column, String, Text, DateTime, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.orm import declarative_base, sessionmaker
 import datetime
 import uuid
@@ -8,8 +9,8 @@ Base = declarative_base()
 
 class Conversation(Base):
     __tablename__ = 'conversations'
-    thread_id = Column(String, primary_key=True)
-    name = Column(String, nullable=False)
+    thread_id : Mapped[str]= mapped_column(String, primary_key=True)
+    name : Mapped[str] = mapped_column(String, nullable=False)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
 class Message(Base):
