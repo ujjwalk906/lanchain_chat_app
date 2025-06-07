@@ -16,28 +16,29 @@ def cli_chat():
     engine = get_engine()
     initialize_database(engine)
     db_session = get_session(engine)
-    # api_key = input("Enter your OpenAI API key: ").strip()
-    llm = get_llm("llama3.2:1b-instruct-q8_0")
+    print(get_messages("1665c514-f86a-410c-9f08-7182b87daf82", db_session=db_session))
+    # # api_key = input("Enter your OpenAI API key: ").strip()
+    # llm = get_llm("llama3.2:1b-instruct-q8_0")
 
-    # --- New conversation ---
-    conversation_name = input("Enter a name for your conversation: ")
-    thread_id = create_conversation(db_session, conversation_name)
-    print(f"Starting conversation '{conversation_name}' (ID: {thread_id})")
+    # # --- New conversation ---
+    # conversation_name = input("Enter a name for your conversation: ")
+    # thread_id = create_conversation(db_session, conversation_name)
+    # print(f"Starting conversation '{conversation_name}' (ID: {thread_id})")
 
-    while True:
-        user_input = input("You: ")
-        if user_input.lower() == "exit":
-            break
+    # while True:
+    #     user_input = input("You: ")
+    #     if user_input.lower() == "exit":
+    #         break
 
-        add_user_message(thread_id, user_input, db_session)
-        messages = get_messages(thread_id, db_session)
-        response = get_ai_response(messages, llm)
-        add_ai_message(thread_id, response, db_session)
-        print(f"AI: {response}")
+    #     add_user_message(thread_id, user_input, db_session)
+    #     messages = get_messages(thread_id, db_session)
+    #     response = get_ai_response(messages, llm)
+    #     add_ai_message(thread_id, response, db_session)
+    #     print(f"AI: {response}")
 
-        # for openai models use this
-        # add_ai_message(thread_id, response.content, db_session)
-        # print(f"AI: {response.content}")
+    #     # for openai models use this
+    #     # add_ai_message(thread_id, response.content, db_session)
+    #     # print(f"AI: {response.content}")
 
 if __name__ == "__main__":
     cli_chat()

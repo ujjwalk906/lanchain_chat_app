@@ -9,17 +9,17 @@ Base = declarative_base()
 
 class Conversation(Base):
     __tablename__ = 'conversations'
-    thread_id : Mapped[str]= mapped_column(String, primary_key=True)
-    name : Mapped[str] = mapped_column(String, nullable=False)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    thread_id: Mapped[str] = mapped_column(String, primary_key=True)
+    name: Mapped[str] = mapped_column(String, nullable=False)
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.utcnow)
 
 class Message(Base):
     __tablename__ = 'messages'
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    thread_id = Column(String, ForeignKey('conversations.thread_id'), nullable=False)
-    role = Column(String, nullable=False)  # 'user' or 'ai'
-    content = Column(Text, nullable=False)
-    timestamp = Column(DateTime, default=datetime.datetime.utcnow)
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    thread_id: Mapped[str] = mapped_column(String, ForeignKey('conversations.thread_id'), nullable=False)
+    role: Mapped[str] = mapped_column(String, nullable=False)  # 'user' or 'ai'
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    timestamp: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.utcnow)
 
 def get_engine(db_url="sqlite:///chat_history.db"):
     return create_engine(db_url)
