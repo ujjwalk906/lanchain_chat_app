@@ -1,6 +1,6 @@
 # history.py
 from langchain_core.messages import HumanMessage, AIMessage
-from db import Message
+from src.db.models import Message
 
 def get_messages(thread_id, db_session):
     records = db_session.query(Message).filter_by(thread_id=thread_id).order_by(Message.timestamp).all()

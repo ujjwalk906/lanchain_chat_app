@@ -1,8 +1,8 @@
 # cli.py
 import uuid
-from db import get_engine, get_session, initialize_database, Conversation
-from conversation_ops import get_messages, add_user_message, add_ai_message
-from chat_engine import get_llm, get_ai_response
+from src.db.models import get_engine, get_session, initialize_database, Conversation
+from src.core.message_service import get_messages, add_user_message, add_ai_message
+from src.core.chat_engine import get_llm, get_ai_response
 
 def create_conversation(db_session, name):
     thread_id = str(uuid.uuid4())

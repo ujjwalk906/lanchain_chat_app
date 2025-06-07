@@ -2,7 +2,7 @@
 
 from typing import List, Optional
 from sqlalchemy.orm import Session
-from db import Conversation, get_session, get_engine
+from src.db.models import Conversation, get_session, get_engine
 
 def list_conversations(db_session: Session) -> List[Conversation]:
     """
