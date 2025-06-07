@@ -13,12 +13,13 @@ def create_conversation(db_session, name):
 
 def cli_chat():
     # --- Setup ---
-    engine = get_engine()
-    initialize_database(engine)
-    db_session = get_session(engine)
-    print(get_messages("1665c514-f86a-410c-9f08-7182b87daf82", db_session=db_session))
+    # engine = get_engine()
+    # initialize_database(engine)
+    # db_session = get_session(engine)
+    # print(get_messages("1665c514-f86a-410c-9f08-7182b87daf82", db_session=db_session))
     # # api_key = input("Enter your OpenAI API key: ").strip()
-    # llm = get_llm("llama3.2:1b-instruct-q8_0")
+    llm = get_llm('ollama',model_name = "llama3.2:1b-instruct-q8_0")
+    print(llm.invoke("HI"))
 
     # # --- New conversation ---
     # conversation_name = input("Enter a name for your conversation: ")
