@@ -2,7 +2,7 @@
 import uuid
 from src.db.models import get_engine, get_session, initialize_database, Conversation
 from src.core.message_service import get_messages, add_user_message, add_ai_message
-from src.core.chat_engine import get_llm, get_ai_response
+from src.core.llm_adapters import get_llm
 
 def create_conversation(db_session, name):
     thread_id = str(uuid.uuid4())
@@ -18,8 +18,10 @@ def cli_chat():
     # db_session = get_session(engine)
     # print(get_messages("1665c514-f86a-410c-9f08-7182b87daf82", db_session=db_session))
     # # api_key = input("Enter your OpenAI API key: ").strip()
+
+    # from langchain_core.messages import HumanMessage
     llm = get_llm('ollama',model_name = "llama3.2:1b-instruct-q8_0")
-    print(llm.invoke("HI"))
+    print(llm.invoke("hi"))
 
     # # --- New conversation ---
     # conversation_name = input("Enter a name for your conversation: ")
