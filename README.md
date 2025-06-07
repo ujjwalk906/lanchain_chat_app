@@ -12,3 +12,5 @@ list past conversations
 get all messages related to that conversation
 
 other things related to indiviual conversations are handled by history.py
+
+store the model name used for each conversation.

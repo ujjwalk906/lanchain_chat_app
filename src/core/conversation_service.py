@@ -1,8 +1,24 @@
-# conversations_manager.py
+# conversations_service.py
 
 from typing import List, Optional
 from sqlalchemy.orm import Session
 from src.db.models import Conversation, get_session, get_engine
+import uuid
+import datetime
+
+def create_conversation(name: str, db_session: Session) -> Conversation:
+    """
+    Creates a new conversation with a unique thread_id and returns it.
+    """
+    conversation = Conversation(
+        thread_id=str(uuid.uuid4()),
+        name=name,
+        created_at=datetime.datetime.utcnow()
+    )
+    db_session.add(conversation)
+    db_session.commit()
+    db_session.refresh(conversation)
+    return conversation
 
 def list_conversations(db_session: Session) -> List[Conversation]:
     """
@@ -22,7 +38,7 @@ def get_conversation_by_name(db_session: Session, name: str) -> Optional[Convers
     """
     return db_session.query(Conversation).filter_by(name=name).first()
 
-def delete_conversation(db_session: Session, thread_id: str) -> None:
+def delete_conversation(db_session: Session, thread_id: str) -> bool:
     """
     Deletes a conversation and all its messages (cascading delete recommended).
     """
@@ -30,6 +46,8 @@ def delete_conversation(db_session: Session, thread_id: str) -> None:
     if conversation:
         db_session.delete(conversation)
         db_session.commit()
+        return True
+    return False
 
 def rename_conversation(db_session: Session, thread_id: str, new_name: str) -> None:
     """
