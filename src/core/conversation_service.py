@@ -6,13 +6,17 @@ from src.db.models import Conversation, get_session, get_engine
 import uuid
 import datetime
 
-def create_conversation(name: str, db_session: Session) -> Conversation:
+
+def create_conversation(name: str, provider: str, model_name: str, db_session: Session) -> Conversation:
     """
     Creates a new conversation with a unique thread_id and returns it.
     """
+    
     conversation = Conversation(
         thread_id=str(uuid.uuid4()),
         name=name,
+        provider=provider,
+        model_name=model_name,
         created_at=datetime.datetime.utcnow()
     )
     db_session.add(conversation)

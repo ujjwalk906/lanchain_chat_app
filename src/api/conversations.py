@@ -18,22 +18,37 @@ def api_list_conversations(db_session=Depends(get_session)):
         ConversationOut(
             id=c.thread_id,
             name=c.name,
-            created_at=c.created_at
+            provider=c.provider,
+            model_name=c.model_name,
+            created_at=c.created_at,
         )
         for c in conversations
     ]
 
 @router.post("/conversations", response_model=ConversationOut, status_code=status.HTTP_201_CREATED)
 def api_create_conversation(conv: ConversationCreate, db_session=Depends(get_session)):
-    c = create_conversation(conv.name, db_session)
-    return ConversationOut(id=c.thread_id, name=c.name, created_at=c.created_at)
+    c = create_conversation(conv.name, conv.provider, conv.model_name, db_session)
+    return ConversationOut(
+        id=c.thread_id,
+        name=c.name,
+        provider=c.provider,
+        model_name=c.model_name,
+        created_at=c.created_at
+    )
 
 @router.patch("/conversations/{conversation_id}", response_model=ConversationOut)
 def api_rename_conversation(conversation_id: str, update: ConversationUpdate, db_session=Depends(get_session)):
     c = rename_conversation(db_session, conversation_id, update.name)
     if not c:
         raise HTTPException(status_code=404, detail="Conversation not found")
-    return ConversationOut(id=c.thread_id, name=c.name, created_at=c.created_at)
+    
+    return ConversationOut(
+            id=c.thread_id,
+            name=c.name,
+            provider=c.provider,
+            model_name=c.model_name,
+            created_at=c.created_at,
+        )
 
 @router.delete("/conversations/{conversation_id}", response_model=DeleteResponse)
 def api_delete_conversation(conversation_id: str, db_session=Depends(get_session)):

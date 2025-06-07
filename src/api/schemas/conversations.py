@@ -4,13 +4,18 @@ from datetime import datetime
 
 class ConversationCreate(BaseModel):
     name: str
+    provider: str
+    model_name: str
 
 class ConversationOut(BaseModel):
-    id: str         # or thread_id
+    id: str
     name: str
+    provider: str
+    model_name: str
     created_at: datetime
-    last_message: str | None = None   # optional, for previews
-    last_updated: datetime | None = None  # optional
+    last_message: str | None = None
+    last_updated: datetime | None = None
+
 
 class ConversationUpdate(BaseModel):
     name: str
