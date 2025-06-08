@@ -12,7 +12,7 @@ def get_ollama_llm(model_name: str, **kwargs):
     from langchain_ollama.llms import OllamaLLM
     return OllamaLLM(model=model_name, **kwargs)
 
-def get_azure_llm(model_name: str, api_version: str = '2025-04-14', **kwargs):
+def get_azure_llm(model_name: str, api_version: str = '2023-05-15', **kwargs):
     from langchain_openai.chat_models import AzureChatOpenAI
     return AzureChatOpenAI(
             azure_deployment=model_name,

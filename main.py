@@ -4,6 +4,11 @@ from src.api.messages import router as messages_router
 from src.db.models import Base
 from src.db.session import engine
 
+
+# from dotenv import load_dotenv
+
+# load_dotenv()
+
 def initialize_database():
     Base.metadata.create_all(bind=engine)
 
