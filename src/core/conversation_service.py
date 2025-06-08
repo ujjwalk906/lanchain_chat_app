@@ -2,7 +2,8 @@
 
 from typing import List, Optional
 from sqlalchemy.orm import Session
-from src.db.models import Conversation, get_session, get_engine
+from src.db.session import get_session
+from src.db.models import Conversation
 import uuid
 import datetime
 
@@ -61,10 +62,5 @@ def rename_conversation(db_session: Session, thread_id: str, new_name: str) -> N
     if conversation:
         conversation.name = new_name
         db_session.commit()
-
-# Example usage for testing/debugging:
-if __name__ == "__main__":
-    engine = get_engine()
-    session = get_session(engine)
-    for c in list_conversations(session):
-        print(f"{c.thread_id}: {c.name} ({c.created_at})")
+        
+    return conversation

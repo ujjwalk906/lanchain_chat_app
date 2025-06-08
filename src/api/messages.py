@@ -12,7 +12,7 @@ from src.core.conversation_service import get_conversation_by_id
 from src.core.llm_adapters import get_llm
 from src.core.chat_engine import get_ai_response
 
-from src.db.models import get_session
+from src.db.session import get_session
 router = APIRouter()
 
 @router.get("/conversations/{conversation_id}/messages", response_model=List[MessageOut])

@@ -7,7 +7,7 @@ from src.core.conversation_service import (
     list_conversations, get_conversation_by_id,
     create_conversation, delete_conversation, rename_conversation
 )
-from src.db.models import get_session
+from src.db.session import get_session
 
 router = APIRouter()
 

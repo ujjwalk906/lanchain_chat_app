@@ -23,12 +23,3 @@ class Message(Base):
     content: Mapped[str] = mapped_column(Text, nullable=False)
     timestamp: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.utcnow)
 
-def get_engine(db_url="sqlite:///chat_history.db"):
-    return create_engine(db_url)
-
-def get_session(engine):
-    SessionLocal = sessionmaker(bind=engine)
-    return SessionLocal()
-
-def initialize_database(engine):
-    Base.metadata.create_all(engine)
