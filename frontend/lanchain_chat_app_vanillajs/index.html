@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Application</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            height: 100vh;
+            display: flex;
+            background-color: #f5f5f5;
+        }
+
+        /* Sidebar for conversations */
+        .sidebar {
+            width: 300px;
+            background: white;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .new-chat-btn {
+            width: 100%;
+            padding: 12px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .new-chat-btn:hover {
+            background: #0056b3;
+        }
+
+        .conversations-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .conversation-item {
+            padding: 12px;
+            margin-bottom: 5px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .conversation-item:hover {
+            background: #f8f9fa;
+        }
+
+        .conversation-item.active {
+            background: #e3f2fd;
+            border-color: #2196f3;
+        }
+
+        .conversation-info {
+            flex: 1;
+        }
+
+        .conversation-name {
+            font-weight: 500;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .conversation-meta {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .delete-btn:hover {
+            background: #c82333;
+        }
+
+        /* Main chat area */
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            background: white;
+        }
+
+        .chat-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .chat-subtitle {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #fafafa;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            max-width: 80%;
+        }
+
+        .message.user {
+            margin-left: auto;
+        }
+
+        .message.ai {
+            margin-right: auto;
+        }
+
+        .message-header {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #666;
+        }
+
+        .message.user .message-header {
+            text-align: right;
+        }
+
+        .message-content {
+            padding: 12px 16px;
+            border-radius: 12px;
+            line-height: 1.5;
+        }
+
+        .message.user .message-content {
+            background: #007bff;
+            color: white;
+        }
+
+        .message.ai .message-content {
+            background: white;
+            border: 1px solid #e0e0e0;
+        }
+
+        /* Input area */
+        .input-container {
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+            background: white;
+        }
+
+        .input-form {
+            display: flex;
+            gap: 10px;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            resize: none;
+            min-height: 50px;
+        }
+
+        .send-btn {
+            padding: 12px 24px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .send-btn:hover {
+            background: #218838;
+        }
+
+        .send-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Loading states */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #666;
+            padding: 40px;
+        }
+
+        /* New conversation modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            width: 400px;
+            max-width: 90%;
+        }
+
+        .modal-header {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .btn-secondary {
+            padding: 10px 20px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <button class="new-chat-btn" onclick="showNewChatModal()">+ New Chat</button>
+        </div>
+        <div class="conversations-list" id="conversationsList">
+            <!-- Conversations will be loaded here -->
+        </div>
+    </div>
+
+    <!-- Main chat area -->
+    <div class="chat-container">
+        <div class="chat-header" id="chatHeader">
+            <div class="chat-title">Select a conversation</div>
+            <div class="chat-subtitle">Choose a conversation from the sidebar to start chatting</div>
+        </div>
+        
+        <div class="messages-container" id="messagesContainer">
+            <div class="empty-state">
+                <p>No conversation selected</p>
+            </div>
+        </div>
+        
+        <div class="input-container" id="inputContainer" style="display: none;">
+            <form class="input-form" onsubmit="sendMessage(event)">
+                <textarea 
+                    class="message-input" 
+                    id="messageInput" 
+                    placeholder="Type your message..."
+                    rows="2"
+                ></textarea>
+                <button type="submit" class="send-btn" id="sendBtn">Send</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- New Chat Modal -->
+    <div class="modal" id="newChatModal">
+        <div class="modal-content">
+            <div class="modal-header">Create New Conversation</div>
+            <form onsubmit="createNewConversation(event)">
+                <div class="form-group">
+                    <label for="chatName">Name:</label>
+                    <input type="text" id="chatName" required>
+                </div>
+                <div class="form-group">
+                    <label for="provider">Provider:</label>
+                    <select id="provider" required>
+                        <option value="">Select provider</option>
+                        <option value="openai">OpenAI</option>
+                        <option value="anthropic">Anthropic</option>
+                        <option value="google">Google</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="modelName">Model:</label>
+                    <input type="text" id="modelName" placeholder="e.g., gpt-4, claude-3" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="hideNewChatModal()">Cancel</button>
+                    <button type="submit" class="btn-primary">Create</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Include libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.0/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.2/marked.min.js"></script>
+
+    <script>
+        // Configuration - Update this with your API base URL
+        const API_BASE_URL = 'http://127.0.0.1:8000'; // Change this to your FastAPI server URL
+        
+        // Global state
+        let conversations = [];
+        let currentConversationId = null;
+        let messages = [];
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            loadConversations();
+        });
+
+        // Load all conversations from API
+        async function loadConversations() {
+            try {
+                const response = await axios.get(`${API_BASE_URL}/conversations`);
+                conversations = response.data;
+                renderConversations();
+            } catch (error) {
+                console.error('Error loading conversations:', error);
+            }
+        }
+
+        // Render conversations in sidebar
+        function renderConversations() {
+            const container = document.getElementById('conversationsList');
+            
+            if (conversations.length === 0) {
+                container.innerHTML = '<div class="empty-state">No conversations yet</div>';
+                return;
+            }
+
+            container.innerHTML = conversations.map(conv => `
+                <div class="conversation-item ${conv.id === currentConversationId ? 'active' : ''}" 
+                     onclick="selectConversation('${conv.id}')">
+                    <div class="conversation-info">
+                        <div class="conversation-name">${conv.name}</div>
+                        <div class="conversation-meta">${conv.provider} • ${conv.model_name}</div>
+                    </div>
+                    <button class="delete-btn" onclick="deleteConversation(event, '${conv.id}')">×</button>
+                </div>
+            `).join('');
+        }
+
+        // Select a conversation
+        async function selectConversation(conversationId) {
+            currentConversationId = conversationId;
+            const conversation = conversations.find(c => c.id === conversationId);
+            
+            // Update header
+            const chatHeader = document.getElementById('chatHeader');
+            chatHeader.innerHTML = `
+                <div class="chat-title">${conversation.name}</div>
+                <div class="chat-subtitle">${conversation.provider} • ${conversation.model_name}</div>
+            `;
+            
+            // Show input container
+            document.getElementById('inputContainer').style.display = 'block';
+            
+            // Load messages
+            await loadMessages(conversationId);
+            
+            // Update sidebar
+            renderConversations();
+        }
+
+        // Load messages for a conversation
+        async function loadMessages(conversationId) {
+            try {
+                const response = await axios.get(`${API_BASE_URL}/conversations/${conversationId}/messages`);
+                messages = response.data;
+                renderMessages();
+            } catch (error) {
+                console.error('Error loading messages:', error);
+                document.getElementById('messagesContainer').innerHTML = 
+                    '<div class="empty-state">Error loading messages</div>';
+            }
+        }
+
+        // Render messages in chat area
+        function renderMessages() {
+            const container = document.getElementById('messagesContainer');
+            
+            if (messages.length === 0) {
+                container.innerHTML = '<div class="empty-state">No messages yet. Start the conversation!</div>';
+                return;
+            }
+
+            container.innerHTML = messages.map(msg => `
+                <div class="message ${msg.role}">
+                    <div class="message-header">
+                        ${msg.role === 'user' ? 'You' : 'AI'} • ${formatTime(msg.timestamp)}
+                    </div>
+                    <div class="message-content">
+                        ${msg.role === 'ai' ? marked.parse(msg.content) : msg.content}
+                    </div>
+                </div>
+            `).join('');
+            
+            // Scroll to bottom
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Send a message
+        async function sendMessage(event) {
+            event.preventDefault();
+            
+            if (!currentConversationId) {
+                alert('Please select a conversation first');
+                return;
+            }
+            
+            const messageInput = document.getElementById('messageInput');
+            const content = messageInput.value.trim();
+            
+            if (!content) return;
+            
+            // Disable send button
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+            sendBtn.textContent = 'Sending...';
+            
+            try {
+                const response = await axios.post(
+                    `${API_BASE_URL}/conversations/${currentConversationId}/messages`,
+                    { content: content }
+                );
+                
+                // The API returns both user and AI messages
+                const newMessages = response.data;
+                messages.push(...newMessages);
+                
+                // Clear input and re-render
+                messageInput.value = '';
+                renderMessages();
+                
+            } catch (error) {
+                console.error('Error sending message:', error);
+                alert('Error sending message. Please try again.');
+            } finally {
+                // Re-enable send button
+                sendBtn.disabled = false;
+                sendBtn.textContent = 'Send';
+            }
+        }
+
+        // Show new chat modal
+        function showNewChatModal() {
+            document.getElementById('newChatModal').classList.add('show');
+        }
+
+        // Hide new chat modal
+        function hideNewChatModal() {
+            document.getElementById('newChatModal').classList.remove('show');
+            // Clear form
+            document.getElementById('chatName').value = '';
+            document.getElementById('provider').value = '';
+            document.getElementById('modelName').value = '';
+        }
+
+        // Create new conversation
+        async function createNewConversation(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('chatName').value;
+            const provider = document.getElementById('provider').value;
+            const modelName = document.getElementById('modelName').value;
+            
+            try {
+                const response = await axios.post(`${API_BASE_URL}/conversations`, {
+                    name: name,
+                    provider: provider,
+                    model_name: modelName
+                });
+                
+                // Add to conversations list and select it
+                const newConversation = response.data;
+                conversations.push(newConversation);
+                
+                hideNewChatModal();
+                await selectConversation(newConversation.id);
+                
+            } catch (error) {
+                console.error('Error creating conversation:', error);
+                alert('Error creating conversation. Please try again.');
+            }
+        }
+
+        // Delete conversation
+        async function deleteConversation(event, conversationId) {
+            event.stopPropagation(); // Prevent selecting the conversation
+            
+            if (!confirm('Are you sure you want to delete this conversation?')) {
+                return;
+            }
+            
+            try {
+                await axios.delete(`${API_BASE_URL}/conversations/${conversationId}`);
+                
+                // Remove from local state
+                conversations = conversations.filter(c => c.id !== conversationId);
+                
+                // If we deleted the current conversation, clear the chat area
+                if (currentConversationId === conversationId) {
+                    currentConversationId = null;
+                    document.getElementById('chatHeader').innerHTML = `
+                        <div class="chat-title">Select a conversation</div>
+                        <div class="chat-subtitle">Choose a conversation from the sidebar to start chatting</div>
+                    `;
+                    document.getElementById('messagesContainer').innerHTML = 
+                        '<div class="empty-state">No conversation selected</div>';
+                    document.getElementById('inputContainer').style.display = 'none';
+                }
+                
+                renderConversations();
+                
+            } catch (error) {
+                console.error('Error deleting conversation:', error);
+                alert('Error deleting conversation. Please try again.');
+            }
+        }
+
+        // Helper function to format timestamp
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleString();
+        }
+
+        // Handle Enter key in textarea (Shift+Enter for new line, Enter to send)
+        document.getElementById('messageInput').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                document.querySelector('.input-form').dispatchEvent(new Event('submit'));
+            }
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('newChatModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                hideNewChatModal();
+            }
+        });
+    </script>
+</body>
+</html>
