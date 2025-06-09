@@ -162,7 +162,7 @@
         .message-content {
             padding: 12px 16px;
             border-radius: 12px;
-            line-height: 1.5;
+            line-height: 1.6;
         }
 
         .message.user .message-content {
@@ -173,6 +173,166 @@
         .message.ai .message-content {
             background: white;
             border: 1px solid #e0e0e0;
+        }
+
+        /* Markdown styling for AI messages */
+        .message.ai .message-content h1,
+        .message.ai .message-content h2,
+        .message.ai .message-content h3,
+        .message.ai .message-content h4,
+        .message.ai .message-content h5,
+        .message.ai .message-content h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        .message.ai .message-content h1 {
+            font-size: 1.5em;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 8px;
+        }
+
+        .message.ai .message-content h2 {
+            font-size: 1.3em;
+        }
+
+        .message.ai .message-content h3 {
+            font-size: 1.1em;
+        }
+
+        .message.ai .message-content p {
+            margin-bottom: 16px;
+        }
+
+        .message.ai .message-content ul,
+        .message.ai .message-content ol {
+            margin-bottom: 16px;
+            padding-left: 24px;
+        }
+
+        .message.ai .message-content li {
+            margin-bottom: 8px;
+        }
+
+        .message.ai .message-content blockquote {
+            margin: 16px 0;
+            padding: 12px 16px;
+            background: #f8f9fa;
+            border-left: 4px solid #dee2e6;
+            font-style: italic;
+        }
+
+        .message.ai .message-content strong {
+            font-weight: 600;
+        }
+
+        .message.ai .message-content em {
+            font-style: italic;
+        }
+
+        /* Inline code styling */
+        .message.ai .message-content code:not(pre code) {
+            background: #f1f3f4;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #d73a49;
+        }
+
+        /* Code block styling */
+        .message.ai .message-content pre {
+            position: relative;
+            background: #f8f8f8;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            margin: 16px 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.45;
+        }
+
+        .message.ai .message-content pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+            color: #24292e;
+            font-size: inherit;
+        }
+
+        /* Copy button for code blocks */
+        .code-block-container {
+            position: relative;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        .copy-btn:hover {
+            opacity: 1;
+            background: #5a6268;
+        }
+
+        .copy-btn.copied {
+            background: #28a745;
+            opacity: 1;
+        }
+
+        /* Tables */
+        .message.ai .message-content table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 16px 0;
+            font-size: 14px;
+        }
+
+        .message.ai .message-content th,
+        .message.ai .message-content td {
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        .message.ai .message-content th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .message.ai .message-content tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        /* Links */
+        .message.ai .message-content a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .message.ai .message-content a:hover {
+            text-decoration: underline;
+        }
+
+        /* Horizontal rules */
+        .message.ai .message-content hr {
+            border: none;
+            border-top: 1px solid #e0e0e0;
+            margin: 24px 0;
         }
 
         /* Input area */
@@ -471,13 +631,77 @@
                         ${msg.role === 'user' ? 'You' : 'AI'} • ${formatTime(msg.timestamp)}
                     </div>
                     <div class="message-content">
-                        ${msg.role === 'ai' ? marked.parse(msg.content) : msg.content}
+                        ${msg.role === 'ai' ? processMarkdownWithCopyButtons(msg.content) : escapeHtml(msg.content)}
                     </div>
                 </div>
             `).join('');
             
             // Scroll to bottom
             container.scrollTop = container.scrollHeight;
+        }
+
+        // Process markdown and add copy buttons to code blocks
+        function processMarkdownWithCopyButtons(content) {
+            // Parse markdown
+            let html = marked.parse(content);
+            
+            // Add copy buttons to code blocks
+            html = html.replace(/<pre><code[^>]*>([\s\S]*?)<\/code><\/pre>/g, (match, code) => {
+                const cleanCode = code.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+                return `
+                    <div class="code-block-container">
+                        <button class="copy-btn" onclick="copyCode(this, '${escapeForAttribute(cleanCode)}')">Copy</button>
+                        ${match}
+                    </div>
+                `;
+            });
+            
+            return html;
+        }
+
+        // Copy code to clipboard
+        function copyCode(button, code) {
+            // Decode the code
+            const decodedCode = code.replace(/&#39;/g, "'").replace(/&quot;/g, '"');
+            
+            navigator.clipboard.writeText(decodedCode).then(() => {
+                const originalText = button.textContent;
+                button.textContent = 'Copied!';
+                button.classList.add('copied');
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy code:', err);
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = decodedCode;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                button.textContent = 'Copied!';
+                button.classList.add('copied');
+                setTimeout(() => {
+                    button.textContent = 'Copy';
+                    button.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        // Escape HTML for user messages
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Escape text for HTML attributes
+        function escapeForAttribute(text) {
+            return text.replace(/'/g, '&#39;').replace(/"/g, '&quot;');
         }
 
         // Send a message
